@@ -43,45 +43,17 @@ class _TodoContainerState extends State<TodoContainer>
     CheckMap(job: "Ax4O8", isCheck: false),
   ];
 
-  final Map<String, bool> _checkedMap = {
-    "YQ75Izp": false,
-    "tMnw": false,
-    "0o6Hoooh": false,
-    "pdov8r22": false,
-    "6EPCT5": false,
-    "s7DyEs2": false,
-    "g7WE3Yl0": false,
-    "Gd7": false,
-    "a1rr": false,
-    "t33V8opW": false,
-    "1Z8g": false,
-    "4MN7ga0": false,
-    "8n7crb": false,
-    "M8d1ya": false,
-    "1pr6nHC1": false,
-    "8NF": false,
-    "xLqtsDHu": false,
-    "F1K": false,
-    "Tb57keBk": false,
-    "Ilh1PXNA": false,
-    "5sF": false,
-    "DxAZ4076": false,
-    "i8z": false,
-    "1Sjv": false,
-    "Ax4O8": false
-  };
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _controller = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 250));
+        vsync: this, duration: const Duration(milliseconds: 1000));
 
     final CurvedAnimation curvedAnimation =
-        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+        CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
 
-    _animation = Tween(begin: 0.0, end: 1.0).animate(curvedAnimation)
+    _animation = Tween(begin: 1.6, end: 1.0).animate(curvedAnimation)
       ..addListener(() => setState(() {}));
 
     _controller.forward(from: 0.0);
@@ -101,34 +73,45 @@ class _TodoContainerState extends State<TodoContainer>
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Stack(
-            children: [
-              Container(
+          Expanded(
+              flex: 3,
+              child: Container(
                 height: MediaQuery.of(context).size.height - 82.0,
                 width: MediaQuery.of(context).size.width,
                 color: Colors.transparent,
-              ),
-              Positioned(
-                top: 245,
-                bottom: 0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30)),
-                      color: Colors.white),
-                  width: MediaQuery.of(context).size.width,
-                  child: checkBoxList(),
-                ),
-              ),
-            ],
-          )
+              )),
+          Expanded(
+              flex: 7,
+              child: Container(
+                decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30)),
+                    color: Colors.white),
+                width: MediaQuery.of(context).size.width,
+                child: _checkBoxList(),
+              ))
         ],
+      ),
+      drawer: Drawer(
+        backgroundColor: Colors.white,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: const [
+            DrawerHeader(child: Text("hehe")),
+            ListTile(title: Text("hehe")),
+            ListTile(title: Text("hehe")),
+            ListTile(title: Text("hehe")),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 500));
+          listKey.currentState
+              ?.insertItem(0, duration: const Duration(milliseconds: 850));
           checkList = [CheckMap(job: "hehe", isCheck: false), ...checkList];
+
+          _controller.forward(from: 0.0);
         },
         backgroundColor: Colors.blueAccent,
         child: const Icon(
@@ -140,24 +123,24 @@ class _TodoContainerState extends State<TodoContainer>
     );
   }
 
-  Widget checkBoxList() {
+  Widget _checkBoxList() {
     return AnimatedList(
       padding: const EdgeInsets.only(top: 15),
       key: listKey,
       initialItemCount: checkList.length,
       itemBuilder: (context, index, animation) {
         return SlideTransition(
-            position: Tween<Offset>(
-                begin: const Offset(-1, 0),
-                end: const Offset(0, 0))
-                .animate(CurvedAnimation(parent: animation, curve: Curves.bounceOut, reverseCurve: Curves.bounceIn)),
-          child: buildRowCheckTile(checkList[index]),
+          position: Tween<Offset>(
+                  begin: const Offset(0.8, 0), end: const Offset(0, 0))
+              .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.elasticOut)),
+          child: _buildRowCheckTile(checkList[index]),
         );
       },
     );
   }
 
-  Widget buildRowCheckTile(CheckMap checkMap) {
+  Widget _buildRowCheckTile(CheckMap checkMap) {
     return CheckboxListTile(
       title: Container(
         transform: Matrix4.identity()..scale(_animation.value, 1.0),
@@ -183,6 +166,15 @@ class _TodoContainerState extends State<TodoContainer>
         });
       },
       value: checkMap.isCheck,
+    );
+  }
+
+  Widget _buildRowTextField() {
+    return const TextField(
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: 'Enter a search term',
+      ),
     );
   }
 }
