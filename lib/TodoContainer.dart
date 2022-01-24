@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/CheckMap.dart';
 
 class TodoContainer extends StatefulWidget {
   const TodoContainer({Key? key}) : super(key: key);
@@ -7,7 +8,41 @@ class TodoContainer extends StatefulWidget {
   _TodoContainerState createState() => _TodoContainerState();
 }
 
-class _TodoContainerState extends State<TodoContainer> {
+class _TodoContainerState extends State<TodoContainer>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation _animation;
+
+  final GlobalKey<AnimatedListState> listKey = GlobalKey();
+
+  var checkList = [
+    CheckMap(job: "YQ75Izp", isCheck: false),
+    CheckMap(job: "tMnw", isCheck: false),
+    CheckMap(job: "0o6Hoooh", isCheck: false),
+    CheckMap(job: "pdov8r22", isCheck: false),
+    CheckMap(job: "6EPCT5", isCheck: false),
+    CheckMap(job: "s7DyEs2", isCheck: false),
+    CheckMap(job: "g7WE3Yl0", isCheck: false),
+    CheckMap(job: "Gd7", isCheck: false),
+    CheckMap(job: "a1rr", isCheck: false),
+    CheckMap(job: "t33V8opW", isCheck: false),
+    CheckMap(job: "1Z8g", isCheck: false),
+    CheckMap(job: "4MN7ga0", isCheck: false),
+    CheckMap(job: "8n7crb", isCheck: false),
+    CheckMap(job: "M8d1ya", isCheck: false),
+    CheckMap(job: "1pr6nHC1", isCheck: false),
+    CheckMap(job: "8NF", isCheck: false),
+    CheckMap(job: "xLqtsDHu", isCheck: false),
+    CheckMap(job: "F1K", isCheck: false),
+    CheckMap(job: "Tb57keBk", isCheck: false),
+    CheckMap(job: "Ilh1PXNA", isCheck: false),
+    CheckMap(job: "5sF", isCheck: false),
+    CheckMap(job: "DxAZ4076", isCheck: false),
+    CheckMap(job: "i8z", isCheck: false),
+    CheckMap(job: "1Sjv", isCheck: false),
+    CheckMap(job: "Ax4O8", isCheck: false),
+  ];
+
   final Map<String, bool> _checkedMap = {
     "YQ75Izp": false,
     "tMnw": false,
@@ -37,6 +72,29 @@ class _TodoContainerState extends State<TodoContainer> {
   };
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 250));
+
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
+    _animation = Tween(begin: 0.0, end: 1.0).animate(curvedAnimation)
+      ..addListener(() => setState(() {}));
+
+    _controller.forward(from: 0.0);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueAccent,
@@ -46,12 +104,12 @@ class _TodoContainerState extends State<TodoContainer> {
           Stack(
             children: [
               Container(
-                height: MediaQuery.of(context).size.height - 82,
+                height: MediaQuery.of(context).size.height - 82.0,
                 width: MediaQuery.of(context).size.width,
                 color: Colors.transparent,
               ),
               Positioned(
-                top: 200,
+                top: 245,
                 bottom: 0,
                 child: Container(
                   decoration: const BoxDecoration(
@@ -59,9 +117,7 @@ class _TodoContainerState extends State<TodoContainer> {
                           topLeft: Radius.circular(30),
                           topRight: Radius.circular(30)),
                       color: Colors.white),
-                  height: MediaQuery.of(context).size.height - 150,
                   width: MediaQuery.of(context).size.width,
-                  alignment: AlignmentDirectional.center,
                   child: checkBoxList(),
                 ),
               ),
@@ -70,33 +126,63 @@ class _TodoContainerState extends State<TodoContainer> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          listKey.currentState?.insertItem(0, duration: const Duration(milliseconds: 500));
+          checkList = [CheckMap(job: "hehe", isCheck: false), ...checkList];
+        },
         backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.add_circle, color: Colors.white, size: 30,),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
       ),
     );
   }
 
   Widget checkBoxList() {
-    return ListView(
-        children: _checkedMap.keys.map((String key) {
-      return CheckboxListTile(
-        title: Text(key,
-            style: const TextStyle(
-                fontSize: 18,
-                fontFamily: "IBMPlexSans",
-                fontWeight: FontWeight.w300),
-            textAlign: TextAlign.center),
-        controlAffinity: ListTileControlAffinity.leading,
-        checkColor: Colors.white,
-        activeColor: Colors.blueAccent,
-        onChanged: (bool? value) {
-          setState(() {
-            _checkedMap[key] = value!;
-          });
-        },
-        value: _checkedMap[key],
-      );
-    }).toList());
+    return AnimatedList(
+      padding: const EdgeInsets.only(top: 15),
+      key: listKey,
+      initialItemCount: checkList.length,
+      itemBuilder: (context, index, animation) {
+        return SlideTransition(
+            position: Tween<Offset>(
+                begin: const Offset(-1, 0),
+                end: const Offset(0, 0))
+                .animate(CurvedAnimation(parent: animation, curve: Curves.bounceOut, reverseCurve: Curves.bounceIn)),
+          child: buildRowCheckTile(checkList[index]),
+        );
+      },
+    );
+  }
+
+  Widget buildRowCheckTile(CheckMap checkMap) {
+    return CheckboxListTile(
+      title: Container(
+        transform: Matrix4.identity()..scale(_animation.value, 1.0),
+        child: Text(
+          checkMap.job,
+          style: TextStyle(
+              fontSize: 20,
+              fontFamily: "IBMPlexSans",
+              fontWeight: FontWeight.w300,
+              decorationColor: Colors.blueAccent,
+              decorationStyle: TextDecorationStyle.solid,
+              decoration: checkMap.isCheck
+                  ? TextDecoration.lineThrough
+                  : TextDecoration.none),
+        ),
+      ),
+      controlAffinity: ListTileControlAffinity.leading,
+      checkColor: Colors.white,
+      activeColor: Colors.blueAccent,
+      onChanged: (bool? value) {
+        setState(() {
+          checkMap.isCheck = value!;
+        });
+      },
+      value: checkMap.isCheck,
+    );
   }
 }
